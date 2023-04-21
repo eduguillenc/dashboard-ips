@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.css" rel="stylesheet"/>
+  <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+  <canvas class="my-4 w-100" id="myChart" height="380"></canvas>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>    
+    // Main Graph statics
+    var ctx = document.getElementById("myChart");
+
+    var myChart = new Chart(ctx, {
+      type: "bar",
+      
+      data: {
+        labels: {{ datasetLabels|tojson }},
+        datasets: [
+          {
+            label: "# of Scenes",
+            data: {{ dataset|tojson }},
+            lineTension: 0,
+            backgroundColor: "transparent",
+            borderColor: "#007bff",
+            borderWidth: 4,
+            pointBackgroundColor: "#007bff",
+          },
+        ],
+      },
+      options: {
+        animations: {
+          tension: {
+            duration: 1000,
+            easing: 'linear',
+            from: 1,
+            to: 0,
+            loop: true
+          }
+        },
+        scales: {
+          yAxes: [
+            {
+              ticks: {
+                beginAtZero: false,
+              },
+            },
+          ],
+        },
+        legend: {
+          display: true,
+        },
+  },
+  
+});
+</script>
+</body>
+</html>
+
+  

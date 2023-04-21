@@ -1,0 +1,21 @@
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="  crossorigin=""/>    
+<style>
+    #map { min-height:90vh; height:95vh; width: 100%; }
+</style>
+{% endblock %}
+{% block content %}
+    <div id="map"></div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript" src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+<script>
+    var map = L.map('map').fitWorld();
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);    
+    {% for marker in markers %}
+    L.marker([{{ marker["lat"] }}, {{ marker["lon"] }}]).addTo(map)
+    .bindPopup("{{ marker["popup"] }}")
+    .openPopup();
+    {% endfor %}
+    </script>
+{% endblock %}
