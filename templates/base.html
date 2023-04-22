@@ -8,11 +8,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.css" rel="stylesheet"/>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admin.css') }}">
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.png') }}">  
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">  
-    {% block head %}{% endblock %} 
-    {{ super() }}  
+    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admin.css') }}"> -->
+    <link rel="stylesheet" type="text/css" href="static/css/admin.css">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.png') }}"> 
+    {% block head %}{% endblock %}       
     <!-- Sidebar -->
     <nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
         <div class="list-group list-group-flush mx-3 mt-4">
@@ -31,17 +30,17 @@
               class="fas fa-calendar fa-fw me-3"></i><span>Calendar</span></a>
           <a href="#" id="" class="list-group-item list-group-item-action py-2 ripple"><i
               class="fas fa-users fa-fw me-3"></i><span>Users</span></a>
-              <select name="optiones" method="POST" action="/" >
+              <!-- <select name="optiones" method="POST" action="/" >
                 <option value="{{options[0]}}" selected>{{options[0]}}</option>
                 {% for option in options[1:] %}
                   <option value="{{option}}">{{option}}</option>
                 {% endfor %}
                 {% print %}
-              </select> 
+              </select>  -->
         </div>
       </div>
     </nav>
-    <!-- Sidebar -->
+    <!-- /Sidebar -->
     <!-- Navbar -->
     <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
       <!-- Container wrapper -->
@@ -132,24 +131,25 @@
       </div>
       <!-- Container wrapper -->
     </nav>
-    <!-- Navbar -->
+    <!-- /Navbar -->
 </head>
 <body>
   <main style="margin-top: 58px">
     <div class="container pt-4">
-      <!-- Section: Main chart -->
+      <!-- Section: Main content -->
       <section class="mb-4">
         <div class="card">
           <div class="card-header py-3">
-            <h5 class="mb-0 text-center"><strong>{% block title %}{% endblock %}</strong></h5>
+            <h5 class="mb-0 text-center"><strong>{% block title %}Dashboard{% endblock %}</strong></h5>
           </div>
           <div class="card-body">
-            <iframe id="frame" src="" width="100%" height="450vh">{% block content %}{% endblock %}</iframe>
+            <!-- <iframe id="frame" src="" width="100%" height="450vh">{% block content %}{% endblock %}</iframe> -->
+            <div class="holds-the-iframe">
+          <iframe border=0 id="frame" src="" width="100%" height="450vh" scrolling="no" noresize frameborder="0" onload="document.getElementById('loadImg').style.display='none';"></iframe>
+        </div>
           </div>
         </div>
       </section>
-    <!-- Navbar -->
-
 <!--Section: Minimal statistics cards-->
 <section>
   <div class="row">
@@ -162,7 +162,7 @@
             </div>
             <div class="text-end">
               <h3>278</h3>
-              <p class="mb-0">New Posts</p>
+              <p class="mb-0">Posts</p>
             </div>
           </div>
         </div>
@@ -177,7 +177,7 @@
             </div>
             <div class="text-end">
               <h3>156</h3>
-              <p class="mb-0">New Comments</p>
+              <p class="mb-0">Comments</p>
             </div>
           </div>
         </div>
@@ -236,7 +236,7 @@
           <div class="d-flex justify-content-between px-md-1">
             <div>
               <h3 class="text-success">156</h3>
-              <p class="mb-0">New Clients</p>
+              <p class="mb-0">New</p>
             </div>
             <div class="align-self-center">
               <i class="far fa-user text-success fa-3x"></i>
@@ -346,7 +346,7 @@
           <div class="d-flex justify-content-between px-md-1">
             <div>
               <h3 class="text-danger">423</h3>
-              <p class="mb-0">Total Visits</p>
+              <p class="mb-0">Total </p>
             </div>
             <div class="align-self-center">
               <i class="fas fa-map-signs text-danger fa-3x"></i>
@@ -363,7 +363,7 @@
     </div>
   </div>
 </section>
-<!--Section: Minimal statistics cards-->
+<!--Section: /Minimal statistics cards-->
 <!--Section: Statistics with subtitles-->
 <section>
   <div class="row">
@@ -377,7 +377,7 @@
               </div>
               <div>
                 <h4>Total Posts</h4>
-                <p class="mb-0">Monthly blog posts</p>
+                <p class="mb-0">Monthly posts</p>
               </div>
             </div>
             <div class="align-self-center">
@@ -451,14 +451,14 @@
     </div>
   </div>
 </section>
-<!--Section: Statistics with subtitles-->
+<!--Section: /Statistics with subtitles-->
 
     <div id="footer">{% block footer %}&copy; Copyright 2023 by <a href="http://abae.gob.ve/">ABAE</a>.{% endblock %}</div>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
     <script>
       $(document).ready(function() {        
-        $("#frame").attr("src", "{{url_for('mapping')}}");
+        $("#frame").attr("src", "{{url_for('datatables')}}");
       });
       $("a#vrss2").click(function() {
         $("#frame").attr("src", "{{url_for('vrss2')}}");

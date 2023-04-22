@@ -11,10 +11,10 @@ app=Flask(__name__)
 def vrss2():   
     #carga con geopandas el shapefile de estados de venezuela
     m = folium.Map(location = [7, -66], zoom_start = 8,scrollWheelZoom=False, dragging=True)
-    vzla = gpd.read_file("data/exterior.zip")
+    vzla = gpd.read_file("static/data/exterior.zip")
     vzla.set_geometry('geometry')
     vzla.crs = "EPSG:4326"
-    orbitas = pd.read_csv("data/orbitas.csv")
+    orbitas = pd.read_csv("static/data/orbitas.csv")
     orbitas['centroide'] = gpd.points_from_xy(orbitas.long_central, orbitas.lat_central)
     orbitas['ul'] = gpd.points_from_xy(orbitas.data_ul_long, orbitas.data_ul_lat)
     orbitas['ur'] = gpd.points_from_xy(orbitas.data_ur_long, orbitas.data_ur_lat)
@@ -25,7 +25,7 @@ def vrss2():
     orbitas.crs = "EPSG:4326"
     #combinacion del punto central dentro del poligono
     gdf=gpd.sjoin(vzla, orbitas, how="right")
-    ruta="data/vrss2/"
+    ruta="static/data/vrss2/"
     lescenas =folium.FeatureGroup(name='Escenas', show=True)
     #cargar huellas 
     for i, g in gdf.iterrows():
@@ -46,10 +46,11 @@ def vrss2():
 @app.route("/folium_map")
 def folium_map(): 
     m = folium.Map(location = [7, -66], zoom_start = 6,scrollWheelZoom=False, dragging=True)
-    vzla = gpd.read_file("data/exterior.zip")
+    vzla = gpd.read_file("static/data/venezuela.zip")
     vzla.set_geometry('geometry')
-    vzla.crs = "EPSG:4326"
+    vzla.crs = "EPSG:4326"    
     folium.GeoJson(data=vzla["geometry"]).add_to(m) 
+    #vzla.to_file('static/data/vzla.geojson', driver='GeoJSON')
     # url = ("https://raw.githubusercontent.com/python-visualization/folium/main/examples/data")
     # state_geo = f"{url}/us-states.json"
     # state_unemployment = f"{url}/US_Unemployment_Oct2012.csv"
@@ -69,30 +70,30 @@ def folium_map():
 
 @app.route("/mapping")
 def mapping():   
-    markers=[{"lat":0,"lon":0,"popup":'This is the middle of the map.'}]
+    markers=[{"lat":7,"lon":-66,"popup":'This is the middle of the map.'}]
     return render_template("mapping.html",
                            markers = markers)
 
 @app.route("/datatables")
 def datatables():
-    with open("data/orbitas.csv", newline="") as f:
+    with open("static/data/orbitas.csv", newline="") as f:
         reader = csv.reader(f)
         data = list(reader)
     return render_template("datatables.html", headings=data[0], data=data[1:])
 
 @app.route("/dashboard")
 def dashboard():
-    with open("data/orbitas.csv", newline="") as f:
+    with open("static/data/orbitas.csv", newline="") as f:
         reader = csv.reader(f)
         data = list(reader)
     return render_template("datatables.html", headings=data[0], data=data[1:]) 
 
 @app.route("/graphs")
 def graphs():
-    vzla = gpd.read_file("data/exterior.zip")
+    vzla = gpd.read_file("static/data/exterior.zip")
     vzla.set_geometry('geometry')
     vzla.crs = "EPSG:4326"
-    orbitas = pd.read_csv("data/orbitas.csv")
+    orbitas = pd.read_csv("static/data/orbitas.csv")
     orbitas['centroide'] = gpd.points_from_xy(orbitas.long_central, orbitas.lat_central)
     orbitas['ul'] = gpd.points_from_xy(orbitas.data_ul_long, orbitas.data_ul_lat)
     orbitas['ur'] = gpd.points_from_xy(orbitas.data_ur_long, orbitas.data_ur_lat)
@@ -114,6 +115,7 @@ def graphs():
     datag = (total_escenas,nubes_promedio,roll_promedio) 
     labelsg = ("total_escenas","nubes_promedio","roll_promedio") 
     return render_template("graphs.html", dataset=datag, datasetLabels=labelsg) 
+
 
 @app.route("/")
 def index():   

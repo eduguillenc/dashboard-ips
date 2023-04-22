@@ -13,3 +13,9 @@ pip freeze > requirements.txt
 
 #update allpackages
 pip --disable-pip-version-check list --outdated --format=json | python -c "import json, sys; print('\n'.join([x['name'] for x in json.load(sys.stdin)]))"
+
+#git limpiar historial
+git checkout --orphan latest_branch&&git add -A&&git commit -am "v1.0"&&git branch -D main&&git branch -m main&&git push -f origin main
+
+#git push
+git add .&&git commit -m "update"&&git push -f origin main

@@ -1,7 +1,39 @@
 {% block head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="  crossorigin=""/>    
+<script type="text/javascript" src="https://stamen-maps.a.ssl.fastly.net/js/tile.stamen.js?v1.3.0"></script>
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.png') }}"> 
 <style>
-    #map { min-height:90vh; height:95vh; width: 100%; }
+      #map {
+                width: 100vw;
+                height: 100vh;
+              }
+              *{
+              --font-family-sans-serif: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+              --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+              }
+            .info {
+                padding: 6px 8px;
+                font: 14px/16px Arial, Helvetica, sans-serif;
+                background: white;
+                background: rgba(255,255,255,0.8);
+                box-shadow: 0 0 15px rgba(0,0,0,0.2);
+                border-radius: 5px;
+            }
+            .info h4 {
+                margin: 0 0 5px;
+                color: #777;
+            }
+            .legend {
+                line-height: 18px;
+                color: #555;
+            }
+            .legend i {
+                width: 18px;
+                height: 18px;
+                float: left;
+                margin-right: 8px;
+                opacity: 0.7;
+            }
 </style>
 {% endblock %}
 {% block content %}
@@ -9,13 +41,179 @@
 {% endblock %}
 {% block scripts %}
 <script type="text/javascript" src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+<script type="text/javascript" src="{{ url_for('static', filename='data/vzla.geojson') }}" ></script>
+
 <script>
-    var map = L.map('map').fitWorld();
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);    
+	var map = L.map('map', {crs: L.CRS.EPSG3857 , 
+			center: [7.406, -65.984], 
+			maxZoom: 8, 
+			minZoom: 3, 
+			zoom: 6,
+			attributionControl: true,
+		//fullscreenControl: true,
+			zoomControl:false 
+	});
+
+/* Basemap Layers */
+var attrib = " abae 2022";
+	    var osm = L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {attribution: attrib + "|<a href='http://www.openstreetmap.org/#map=2/23.9/-6.0&layers=C'>map OpenStreet</a>"});
+        var topo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {attribution: attrib + "|<a href='http://thunderforest.com/'>Maps for Apps</a>"}); 
+        var gray = L.tileLayer("http://basemaps.cartocdn.com/light_all/%7Bz%7D/%7Bx%7D/%7By%7D.png", {attribution: attrib + "|<a href='http://www.openstreetmap.org/#map=2/23.9/-6.0&layers=C'>map OpenStreet</a>"}); 
+
+	L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map)
+	var bounds = [[0.644045387225,-73.3793879998],[12.1979113972,-58.145981]];
+	var overlayerlim = new L.ImageOverlay("{{ url_for('static', filename='data/lim.png') }}", bounds, { opacity: 0.6}).addTo(map);
     {% for marker in markers %}
     L.marker([{{ marker["lat"] }}, {{ marker["lon"] }}]).addTo(map)
     .bindPopup("{{ marker["popup"] }}")
     .openPopup();
-    {% endfor %}
+    {% endfor %} 
+
+    // estados
+	function colorz(d) {
+		return d > 100 ? '#00bfff' :
+			d > 70 ? '#61c9ff' :
+			d > 50 ? '#8ad4ff' :
+			d > 30 ? '#abdfff' :
+			d >  20 ? '#c9e9ff' :
+			d >  5 ? '#e5f4ff' :
+					'#ffffff';
+		} 
+		function zdescargasInfo(e, r) {
+			var t = "<table class='table table-striped table-bordered table-condensed'><tr><th>Estado</th><td>" +
+				 e.properties.ESTADO + "</td></tr><tr><th>ID: </th><td>" + e.properties.ID +
+				"</tr></table>",
+				o = "Estado: ";
+			e.properties && e.properties.ID ? o += t : o += 0, r.bindPopup(o), r.on({
+				mouseover: highlightFeatureZD,
+				mouseout: resetHighlightZD,
+				click: zoomToFeature
+			})
+		}
+		var zdescargasLayer = L.geoJson(data, {
+			style: function(e) {
+				return {
+					weight: 2,
+					opacity: .5,
+					color: "black",
+					dashArray: "2",
+					fillOpacity: .9,
+					fillColor: colorz(e.properties.ID)
+				}
+			},
+			onEachFeature: zdescargasInfo
+		});
+zdescargasLayer.addTo(map);
+
+
+function zoomToFeature(e) {
+    map.fitBounds(e.target.getBounds())
+}
+L.control.layers(baseLayers, overlays, {
+    collapsed: !1
+}).addTo(map), gray.addTo(map);
+var info = L.control();
+
+function highlightFeatureZD(e) {
+    e = e.target;
+    e.setStyle({
+        weight: 5,
+        color: "blue",
+        dashArray: "",
+        fillOpacity: .7
+    }), L.Browser.ie || L.Browser.opera || L.Browser.edge || e.bringToFront(), info.updateZD(e.feature.properties)
+}
+
+
+function resetHighlightZD(e) {
+    zdescargasLayer.resetStyle(e.target), info.updateZD()
+}
+
+info.onAdd = function(e) {
+    return this._div = L.DomUtil.create("div", "info"), this.updateZD(), this._div
+}, info.updateZD = function(e) {
+    this._div.innerHTML = "<h4>Info </h4>" + (e ? "<b>" + e.ESTADO + "</b><br />" + e.ID + " / ton" : "Pase por encima de un estado")
+}, info.addTo(map);
+
+var legendZD = L.control({
+        position: "bottomright"
+    }),
+
+legendZD.onAdd = function(e) {
+    for (var r, t, o = L.DomUtil.create("div", "info legend"), a = [0, 10, 20, 50, 100, 200, 500, 1e3], i = [], s = 0; s < a.length; s++) r = a[s], t = a[s + 1], i.push('<i style="background:' + colorz(r + 1) + '"></i> ' + r + (t ? "&ndash;" + t : "+"));
+	return o.innerHTML=i.join("<br>"),o};
+// map.on("overlayadd", function(e) {
+//     e.layer == zdescargasLayer ? legendZD.addTo(this) : e.layer == compesquerasLayer && legendCP.addTo(this)
+// }), map.on("overlayremove", function(e) {
+//     e.layer == zdescargasLayer ? this.removeControl(legendZD) : e.layer == compesquerasLayer && this.removeControl(legendCP)
+// });
+
+	map.on("hover", function (feature, layer) { 
+    layer.on({
+  		    'mouseover': function (e) {
+  		      highlight(e.target);
+  		    },
+  		    'mouseout': function (e) {
+  		      dehighlight(e.target);
+  		    },
+  				'click': function (e) {
+  				  select(e.target);
+  				}
+  			});
+	});
+
+
+//LAYER CONTROL
+        var baseLayers = {
+            "Mapamundi": topo,
+            "Openstreet": gray
+        };
+        var overlays = {
+			"Estados de Venezuela": zdescargasLayer
+            // "<img src='../data/lim.png' width='30' height='30' /> Estados": dataLayer,
+        };
+        L.control.layers(baseLayers, overlays,{collapsed:false}).addTo(map);	  
+        //L.control.mousePosition().addTo(map);
+	      //L.control.scale({options: {position:'topleft',maxWidth: 100,metric: true,imperial: true,updateWhenIdle: true}}).addTo(map)
+        topo.addTo(map);   
+
+/* Layer control  */
+
+	function highlight (layer) {
+			layer.setStyle({
+				weight: 5,
+				dashArray: ''
+			});
+			if (!L.Browser.ie && !L.Browser.opera) {
+				layer.bringToFront();
+			}
+		}
+
+		function dehighlight (layer) {
+		  if (selected === null || selected._leaflet_id !== layer._leaflet_id) {
+			  geojson.resetStyle(layer);
+		  }
+		}
+
+		function select (layer) {
+		  if (selected !== null) {
+		    var previous = selected;
+		  }
+			map.fitBounds(layer.getBounds());
+			selected = layer;
+			if (previous) {
+			  dehighlight(previous);
+			}
+		}
+    var selected = null;
+
+    // map.on('zoomend', function () {
+    //     if (map.getZoom() >= 5 && map.hasLayer(texportLayer)) {
+    //         map.removeLayer(texportLayer);
+    //         }
+    //     if (map.getZoom() <= 4 && !map.hasLayer(texportLayer)) {
+    //         map.addLayer(texportLayer)
+    //     }
+    // }); 
     </script>
 {% endblock %}
