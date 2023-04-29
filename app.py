@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template
 import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Polygon
